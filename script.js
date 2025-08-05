@@ -10,13 +10,9 @@ function hideSplashAndPlay() {
   tryPlayMusic();
 }
 
+// Splash click triggers
 splash.addEventListener("click", hideSplashAndPlay);
 splash.addEventListener("touchstart", hideSplashAndPlay, { once: true });
-
-const pages = document.querySelectorAll(".page");
-let current = 0;
-let startX = null;
-const swipeThreshold = 50;
 
 // Flip sound
 const flipSound = new Audio("sounds/flip.mp3");
@@ -36,12 +32,13 @@ function playAfterTouch() {
 }
 tryPlayMusic();
 
-// Swipe detection
-document.addEventListener("touchstart", start, false);
-document.addEventListener("touchend", end, false);
-document.addEventListener("mousedown", start, false);
-document.addEventListener("mouseup", end, false);
+// Variables for swipe detection
+const pages = document.querySelectorAll(".page");
+let current = 0;
+let startX = null;
+const swipeThreshold = 50;
 
+// Swipe logic
 function start(e) {
   startX = e.touches ? e.touches[0].clientX : e.clientX;
 }
@@ -66,4 +63,33 @@ function end(e) {
   }
 
   startX = null;
+}
+
+// ✅ Wait for all images before enabling swipe
+window.addEventListener("load", () => {
+  const allImages = document.querySelectorAll(".page img");
+  let loaded = 0;
+
+  allImages.forEach(img => {
+    if (img.complete) {
+      loaded++;
+    } else {
+      img.addEventListener("load", () => {
+        loaded++;
+        if (loaded === allImages.length) enableFlip();
+      });
+    }
+  });
+
+  if (loaded === allImages.length) {
+    enableFlip();
+  }
+});
+
+// ✅ Only add swipe events after images are ready
+function enableFlip() {
+  document.addEventListener("touchstart", start, false);
+  document.addEventListener("touchend", end, false);
+  document.addEventListener("mousedown", start, false);
+  document.addEventListener("mouseup", end, false);
 }
